@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/45662cad-574f-43d0-91c0-5ca8daabea4e/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/mk-kaffee",
+    "appService.deploySubpath": "."
+}
