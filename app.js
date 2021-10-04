@@ -44,6 +44,17 @@ app.post('/cafemachines', async (req, res) => {
   }
 })
 
+app.put('/cafemachines', async (req, res) => {
+  if (req.body && Object.keys(req.body).length > 0) {
+    res.send(await data.findAndUpdateCafeMachine(req.body.id, req.body.state));
+  } else {
+    console.log('req.body');
+    console.log(req.body);
+    console.log('Object.keys(req.body)');
+    console.log(Object.keys(req.body));
+  }
+})
+
 app.get('/cafemachines/:id', async (req, res) => {
   res.send(await data.findCafeMachines(req.params.id));
 })
@@ -51,8 +62,6 @@ app.get('/cafemachines/:id', async (req, res) => {
 app.get('/cafemachines', async (req, res) => {
   res.send(await data.findCafeMachines());
 })
-
-// TODO: add PUT endpoint to update cafemachine state: body: { id: number, state: number, stateDateTime: string}
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)

@@ -2,6 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require('mongodb').ObjectID;
 // read .env file
 require('dotenv').config();
+const moment = require('moment');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const DATABASE_NAME = process.env.DATABASE_NAME;
@@ -76,8 +77,25 @@ const findCafeMachines = async (cafemachineId) => {
     return cafemachineId !== undefined ? await collection.find({id: parseInt(cafemachineId)}).toArray() : await collection.find().toArray();
 };
 
+const findAndUpdateCafeMachine = async (cafemachineId, state) => {
+
+    if (!db)
+        throw Error('findCafeMachines::missing required params');
+
+    const collection = await db.collection(DATABASE_COLLECTION_NAME);
+
+    await collection.findOneAndUpdate(
+        {id: parseInt(cafemachineId)},
+        { "$set": 
+            {"state": state, 
+            "stateDateTime": moment().format('yyyy-mm-dd:hh:mm:ss')}
+        } 
+    )
+};
+
 module.exports = {
     connectToDatabase,
     insertCafeMachines,
-    findCafeMachines
+    findCafeMachines,
+    findAndUpdateCafeMachine
 };
