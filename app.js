@@ -1,81 +1,58 @@
 const express = require('express')
+const bodyParser = require('body-parser');
 const app = express()
+app.use( bodyParser.json()); 
 const port = process.env.PORT || 3000;
-const MongoClient = require('mongodb').MongoClient;
-const url = "mongodb://7157d93e-0ee0-4-231-b9ee:HSfyPrZDGHJ1VhCuHGcOqDHmQgigirkRNuJPxaOmDkaNWt5hMbjfaMQVV4JImgXokR0HID4dV4uONaH2hKCSrA==@7157d93e-0ee0-4-231-b9ee.mongo.cosmos.azure.com:10255/mk-kaffee?ssl=true&retrywrites=false&maxIdleTimeMS=120000&appName=@7157d93e-0ee0-4-231-b9ee@";
+const data = require('./data')
+
+const cafeMachines = [
+  {
+    cafeMachineName: 'The around the corner kitchen',
+    id: 0,
+    state: 0,
+    stateDateTime: '2021-10-03 22:00'
+  },
+  {
+    cafeMachineName: 'That other kitchen',
+    id: 1,
+    state: 1,
+    stateDateTime: '2021-10-03 22:00'
+  },
+  {
+    cafeMachineName: 'The far far away kitchen',
+    id: 2,
+    state: 1,
+    stateDateTime: '2021-10-03 22:00'
+  }
+];
+
+const dbConnected = data.connectToDatabase();
 
 app.get('/', (req, res) => {
   res.send('Hello Kitty2!')
 })
 
-app.get('/test/', (req, res) => {
-  res.send('Hello Test!')
+app.post('/cafemachines', async (req, res) => {
+  if (req.body && Object.keys(req.body).length > 0) {
+    const newItem = [req.body];
+    await data.insertCafeMachines(newItem);
+  } else {
+    console.log('req.body');
+    console.log(req.body);
+    console.log('Object.keys(req.body)');
+    console.log(Object.keys(req.body));
+  }
 })
 
-// app.post('/automat', (req, res) => {
-//   res.json({requestBody: req.body})
-//   res.send('Dzięki za kawę')
-// })
-
-app.post('/automat', (req, res) => {
-  MongoClient.connect(url, function(err, db) {
-      if (err) throw err;
-      var dbo = db.db("mk-kaffee");
-      dbo.collection("cafeMachines").insertOne({
-          state: req.body.state
-      }, 
-      function(err, result) {
-          if (err) throw err;
-          res.json(result);
-          db.close();
-      });
-  });
+app.get('/cafemachines/:id', async (req, res) => {
+  res.send(await data.findCafeMachines(req.params.id));
 })
 
-app.put('/cafeMachinesTestPUT', (req, res) => {
-  res.json({requestBody: req.body})
+app.get('/cafemachines', async (req, res) => {
+  res.send(await data.findCafeMachines());
 })
 
-MongoClient.connect(url, function(err, db) {
-  if (err) throw err;
-  console.log('Connected to Database');
-})
-
-app.put('/cafeMachines', (req, res) => {
-  MongoClient.connect(url, function(err, db) {
-      if (err) throw err;
-      res.send('Connected to Database');
-      var dbo = db.db("mk-kaffee");
-      dbo.collection("cafeMachines").insertOne({
-          id: req.body.id,
-          state: req.body.state
-      }, 
-      function(err, result) {
-          if (err) throw err;
-          res.json(result);
-          db.close();
-      });
-  });
-})
-
-// const cafeMachines = [
-//   {
-//     cafeMachineName: 'Closest kitchen',
-//     id: 0,
-//     state: 0
-//   },
-//   {
-//     cafeMachineName: 'Other kitchen',
-//     id: 1,
-//     state: 1
-//   }
-// ];
-
-app.get('/cafemachines/:id', (req, res) => {
-  // res.send(cafeMachines.find(cm=> cm.id == req.params.id));
-  const cm = cafeMachines.find(cm=> cm.id == req.params.id);
-  res.send(`Coffee machine is ${cm.state ? 'OK' : 'probably empty'}`);
-})
+// TODO: add PUT endpoint to update cafemachine state: body: { id: number, state: number, stateDateTime: string}
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
